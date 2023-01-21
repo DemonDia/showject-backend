@@ -43,7 +43,6 @@ const createNewProject = async (req, res) => {
 
     // check status
     if (status == null || status < 0 || status > 2) {
-
         return res.status(500).json({
             message: "Invalid status",
         });
@@ -52,7 +51,7 @@ const createNewProject = async (req, res) => {
     // check if project pic is there
     if (!projectPicture) {
         projectPicture = "";
-    } 
+    }
 
     // just add the project (defaults)
     const newProject = new Project({
@@ -75,15 +74,76 @@ const createNewProject = async (req, res) => {
 
 // =========================Read=========================
 // 1) Get all projects from database
-const getAllProjects = async (req, res) => {};
+const getAllProjects = async (req, res) => {
+    try {
+        await Project.find()
+            .then((result) => {
+                return res.status(200).json({
+                    data: result,
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                return res.status(500).json({
+                    message: err,
+                });
+            });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
 
 // 2) Get all projects of a specific user
 // takes in userId via the body
-const getAllUserProjects = async (req, res) => {};
+const getAllUserProjects = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        await Project.find({ userId })
+            .then((result) => {
+                return res.status(200).json({
+                    data: result,
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                return res.status(500).json({
+                    message: err,
+                });
+            });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
 
 // 3) Get project by Id
 // takes in projectId by the body
-const getProjectById = async (req, res) => {};
+const getProjectById = async (req, res) => {
+    const {projectId} = req.params;
+    try {
+        await Project.findById(projectId)
+        // find({ userId })
+            .then((result) => {
+                return res.status(200).json({
+                    data: result,
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                return res.status(500).json({
+                    message: err,
+                });
+            });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+
+};
 
 // =========================Update=========================
 // 1) Edit project details (except for likes and comments)

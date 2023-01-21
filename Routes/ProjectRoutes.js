@@ -28,7 +28,7 @@ router.get("/",getAllProjects)
 
 // 2) Get all projects of a specific user
 // unprotected route
-router.get("/:userId",getAllUserProjects)
+router.get("/user/:userId",protection,getAllUserProjects)
 
 // 3) Get project by Id
 // unprotected route
