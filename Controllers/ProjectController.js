@@ -1,10 +1,77 @@
+const mongoose = require("mongoose");
 const User = require("../Models/UserModel");
 const Project = require("../Models/ProjectModel");
+const fs = require("fs");
+
+// =========================Helper functions=========================
 
 // =========================Create=========================
 // 1) Create new project
 // takes in project object via the body
-const createNewProject = async (req, res) => {};
+const createNewProject = async (req, res) => {
+    const {
+        userId,
+        projectName,
+        projectDescription,
+        projectPicture,
+        projectLinks,
+        status,
+    } = req.body;
+    // check if user exists
+    currentUser = await User.findById(userId);
+    if (!currentUser) {
+        return res.status(404).json({
+            message: "User does not exist",
+        });
+    }
+    // check for name and description limit
+    // name cannot 30 char
+    // description cannot exceed 300 char
+    // status cannot be empty
+    if (!projectName || projectName.length > 30) {
+        return res.status(500).json({
+            message:
+                "Project name cannot be empty and cannot exceed 30 characters",
+        });
+    }
+    if (!projectDescription || projectDescription.length > 30) {
+        return res.status(500).json({
+            message:
+                "Project description cannot be empty and cannot exceed 300 characters",
+        });
+    }
+
+    // check status
+    if (status == null || status < 0 || status > 2) {
+
+        return res.status(500).json({
+            message: "Invalid status",
+        });
+    }
+
+    // check if project pic is there
+    if (!projectPicture) {
+        projectPicture = "";
+    } 
+
+    // just add the project (defaults)
+    const newProject = new Project({
+        userId,
+        projectName,
+        projectDescription,
+        status,
+        projectPicture,
+        projectLinks,
+        likes: [],
+        comments: [],
+    });
+    await Project.create(newProject).then((result) => {
+        return res.status(200).json({
+            message: "Project successfully uploaded",
+            data: newProject._id,
+        });
+    });
+};
 
 // =========================Read=========================
 // 1) Get all projects from database

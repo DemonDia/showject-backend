@@ -13,12 +13,13 @@ const {
     addComment,
     deleteProject,
 } = require("../Controllers/ProjectController");
+const {protection} = require("../Middleware/protectionMiddleware")
 
 // ===========================all routes===========================
 // =========================Create=========================
 // 1) Create new project
 // unprotected route
-router.post("/",createNewProject)
+router.post("/",protection,createNewProject)
 
 // =========================Read=========================
 // 1) Get all projects from database
