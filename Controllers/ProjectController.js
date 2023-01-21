@@ -99,7 +99,14 @@ const getAllProjects = async (req, res) => {
 // takes in userId via the body
 const getAllUserProjects = async (req, res) => {
     const { userId } = req.params;
+    console.log("userId",userId)
     try {
+        currentUser = await User.findById(userId);
+        if (!currentUser) {
+            return res.status(404).json({
+                message: "User does not exist",
+            });
+        }
         await Project.find({ userId })
             .then((result) => {
                 return res.status(200).json({

@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../Models/UserModel")
 const protection = async (req, res, next) => {
-    console.log(req.headers)
     if (
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer")
@@ -22,7 +21,6 @@ const protection = async (req, res, next) => {
             });
         }
     } else {
-        console.log("GG")
         return res.status(403).json({
             message: "Unauthorised",
         });
