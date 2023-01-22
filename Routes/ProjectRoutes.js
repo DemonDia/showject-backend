@@ -45,7 +45,7 @@ router.put("/like/:projectid",protection, toggleLikes)
 
 // 3) Comment on a post
 // protected route
-router.put("/comment/add",addComment)
+router.put("/comment/add",protection,addComment)
 
 
 // =========================Delete=========================
