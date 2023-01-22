@@ -49,11 +49,6 @@ const createNewProject = async (req, res) => {
         });
     }
 
-    // check if project pic is there
-    if (!projectPicture) {
-        projectPicture = "";
-    }
-
     // just add the project (defaults)
     const newProject = new Project({
         userId,
