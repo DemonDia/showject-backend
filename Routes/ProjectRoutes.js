@@ -50,7 +50,7 @@ router.put("/comment/add",protection,addComment)
 
 // =========================Delete=========================
 // 1) Delete a project
-router.delete("/:projectId",deleteProject)
+router.delete("/:projectId",protection,deleteProject)
 
 // ===========================routes===========================
 module.exports = router;

@@ -321,7 +321,32 @@ const addComment = async (req, res) => {
 
 // =========================Delete=========================
 // 1) Delete a project
-const deleteProject = async (req, res) => {};
+const deleteProject = async (req, res) => {
+    const { projectId } = req.params;
+    try {
+        const currentProject = await Project.findById(projectId);
+        if (!currentProject) {
+            return res.status(404).json({
+                message: "Project does not exist",
+            });
+        }
+        Project.deleteOne(currentProject)
+            .then(() => {
+                res.status(200).json({
+                    message: "Successfully deleted",
+                });
+            })
+            .catch((err) => {
+                return res.status(500).json({
+                    message: err,
+                });
+            });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
 
 // =======module exports=======
 module.exports = {
