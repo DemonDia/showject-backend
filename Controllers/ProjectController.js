@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../Models/UserModel");
 const Project = require("../Models/ProjectModel");
 const fs = require("fs");
+const uniqid = require("uniqid");
 
 // =========================Helper functions=========================
 
@@ -165,64 +166,70 @@ const editProject = async (req, res) => {
         status,
     } = body;
     const { projectid: projectId } = params;
-    // check if user exists
-    const currentUser = await User.findById(userId);
-    if (!currentUser) {
-        return res.status(404).json({
-            message: "User does not exist",
-        });
-    }
+    try {
+        // check if user exists
+        const currentUser = await User.findById(userId);
+        if (!currentUser) {
+            return res.status(404).json({
+                message: "User does not exist",
+            });
+        }
 
-    // check if project exists
-    const currentProject = await Project.findById(projectId);
-    if (!currentProject) {
-        return res.status(404).json({
-            message: "Project does not exist",
-        });
-    }
+        // check if project exists
+        const currentProject = await Project.findById(projectId);
+        if (!currentProject) {
+            return res.status(404).json({
+                message: "Project does not exist",
+            });
+        }
 
-    // check for name and description limit
-    // name cannot 30 char
-    // description cannot exceed 300 char
-    // status cannot be empty
-    if (!projectName || projectName.length > 30) {
+        // check for name and description limit
+        // name cannot 30 char
+        // description cannot exceed 300 char
+        // status cannot be empty
+        if (!projectName || projectName.length > 30) {
+            return res.status(500).json({
+                message:
+                    "Project name cannot be empty and cannot exceed 30 characters",
+            });
+        }
+        if (!projectDescription || projectDescription.length > 30) {
+            return res.status(500).json({
+                message:
+                    "Project description cannot be empty and cannot exceed 300 characters",
+            });
+        }
+
+        // check status
+        if (status == null || status < 0 || status > 2) {
+            return res.status(500).json({
+                message: "Invalid status",
+            });
+        }
+
+        // just add the project (defaults)
+        const updatedProjectDetail = {
+            projectName,
+            projectDescription,
+            status,
+            projectPicture,
+            projectLinks,
+        };
+        await Project.updateOne(
+            {
+                _id: currentProject.id,
+            },
+            updatedProjectDetail
+        ).then((result) => {
+            return res.status(200).json({
+                message: "Project successfully updated",
+            });
+        });
+    } catch (err) {
         return res.status(500).json({
-            message:
-                "Project name cannot be empty and cannot exceed 30 characters",
+            message: err,
         });
     }
-    if (!projectDescription || projectDescription.length > 30) {
-        return res.status(500).json({
-            message:
-                "Project description cannot be empty and cannot exceed 300 characters",
-        });
-    }
-
-    // check status
-    if (status == null || status < 0 || status > 2) {
-        return res.status(500).json({
-            message: "Invalid status",
-        });
-    }
-
-    // just add the project (defaults)
-    const updatedProjectDetail = {
-        projectName,
-        projectDescription,
-        status,
-        projectPicture,
-        projectLinks,
-    };
-    await Project.updateOne(
-        {
-            _id: currentProject.id,
-        },
-        updatedProjectDetail
-    ).then((result) => {
-        return res.status(200).json({
-            message: "Project successfully updated",
-        });
-    });
 };
 
 // 2) Like/Unlike a project
@@ -231,39 +238,86 @@ const editProject = async (req, res) => {
 // if inside, remove user from the likes array
 // if not inside, add user Id inside
 const toggleLikes = async (req, res) => {
-    console.log(req);
     const { body, params } = req;
     const { userId } = body;
     const { projectid: projectId } = params;
-    currentUser = await User.findById(userId);
-    if (!currentUser) {
-        return res.status(404).json({
-            message: "User does not exist",
+
+    try {
+        const currentUser = await User.findById(userId);
+        if (!currentUser) {
+            return res.status(404).json({
+                message: "User does not exist",
+            });
+        }
+        const currentProject = await Project.findById(projectId);
+        if (!currentProject) {
+            return res.status(404).json({
+                message: "Project does not exist",
+            });
+        }
+        const { likes } = currentProject;
+        if (likes.includes(userId)) {
+            currentProject.likes = likes.filter((likedUserId) => {
+                return likedUserId != userId;
+            });
+        } else {
+            currentProject.likes.push(userId);
+        }
+        currentProject.save();
+        return res.status(200).json({
+            message: "Successfully updated",
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
         });
     }
-    const currentProject = await Project.findById(projectId);
-    if (!currentProject) {
-        return res.status(404).json({
-            message: "Project does not exist",
-        });
-    }
-    const { likes } = currentProject;
-    if (likes.includes(userId)) {
-        currentProject.likes = likes.filter((likedUserId) => {
-            return likedUserId != userId;
-        });
-    } else {
-        currentProject.likes.push(userId);
-    }
-    currentProject.save();
-    return res.status(200).json({
-        message: "Successfully updated",
-    });
 };
 
 // 3) Comment on a post
+// check if use and project exist
 // takes in userId and comment via the body
-const addComment = async (req, res) => {};
+const addComment = async (req, res) => {
+    const { userName, userId, comment, projectId } = req.body;
+
+    try {
+        const currentUser = await User.findById(userId);
+        if (!currentUser) {
+            return res.status(404).json({
+                message: "User does not exist",
+            });
+        }
+        const currentProject = await Project.findById(projectId);
+        if (!currentProject) {
+            return res.status(404).json({
+                message: "Project does not exist",
+            });
+        }
+
+        if (!comment) {
+            return res.status(500).json({
+                message: "Comment cannot be empty",
+            });
+        }
+
+        const newComment = {
+            commentId: uniqid(),
+            commenterId: userId,
+            commenterName: userName,
+            commentContent: comment,
+            commentDate: new Date(),
+        };
+        currentProject.comments.push(newComment);
+        currentProject.save();
+        return res.status(200).json({
+            message: "Successfully updated",
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
 
 // =========================Delete=========================
 // 1) Delete a project
