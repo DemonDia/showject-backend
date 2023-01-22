@@ -40,10 +40,11 @@ router.get("/:projectId",getProjectById)
 router.put("/:projectid",editProject)
 
 // 2) Like/Unlike a project
-// unprotectedroute
-router.put("/like",toggleLikes)
+// protected route
+router.put("/like/:projectid",protection, toggleLikes)
 
 // 3) Comment on a post
+// protected route
 router.put("/comment/add",addComment)
 
 
