@@ -1,7 +1,9 @@
+const mongoose = require("mongoose");
 const User = require("../Models/UserModel");
 const Project = require("../Models/ProjectModel");
+const fs = require("fs");
 const uniqid = require("uniqid");
-const cloudinary = require("cloudinary");
+
 // =========================Helper functions=========================
 
 // =========================Create=========================
@@ -46,12 +48,6 @@ const createNewProject = async (req, res) => {
             message: "Invalid status",
         });
     }
-    // add cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
-        folder: "showjects",
-    });
-
-    const { public_id: pictureId, url: url } = uploadedImage;
 
     // just add the project (defaults)
     const newProject = new Project({
@@ -59,10 +55,7 @@ const createNewProject = async (req, res) => {
         projectName,
         projectDescription,
         status,
-        projectPicture: {
-            pictureId,
-            url,
-        },
+        projectPicture,
         projectLinks,
         likes: [],
         comments: [],
