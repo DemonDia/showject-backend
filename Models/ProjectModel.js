@@ -19,8 +19,11 @@ const projectSchema = mongoose.Schema({
     },
 
     // picture/preview of the project, stored in bits
+    // projectPicture:
+        // pictureId 
+        // url
     projectPicture: {
-        type: String,
+        type: Object,
         required: false
     },
 
