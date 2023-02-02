@@ -166,6 +166,7 @@ const editProject = async (req, res) => {
         projectPicture,
         projectLinks,
         status,
+        previousImageId,
     } = body;
     const { projectid: projectId } = params;
     try {
@@ -201,6 +202,9 @@ const editProject = async (req, res) => {
                     "Project description cannot be empty and cannot exceed 300 characters",
             });
         }
+        if (previousImageId) {
+            await cloudinary.uploader.destroy(previousImageId);
+        }
 
         // check status
         if (status == null || status < 0 || status > 2) {
@@ -209,12 +213,21 @@ const editProject = async (req, res) => {
             });
         }
 
+        // add cloudinary (new pi)
+        const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
+            folder: "showjects",
+        });
+        const { public_id: pictureId, url: url } = uploadedImage;
+
         // just add the project (defaults)
         const updatedProjectDetail = {
             projectName,
             projectDescription,
             status,
-            projectPicture,
+            projectPicture: {
+                pictureId,
+                url,
+            },
             projectLinks,
         };
         await Project.updateOne(
