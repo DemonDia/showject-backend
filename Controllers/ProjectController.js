@@ -47,11 +47,21 @@ const createNewProject = async (req, res) => {
         });
     }
     // add cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
-        folder: "showjects",
-    });
 
-    const { public_id: pictureId, url: url } = uploadedImage;
+    var newImage = {
+        public_id: "",
+        url: "",
+    };
+    if (projectPicture) {
+        const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
+            folder: "showjects",
+        });
+        const { public_id: pictureId, url: url } = uploadedImage;
+        newImage = {
+            pictureId,
+            url,
+        };
+    }
 
     // just add the project (defaults)
     const newProject = new Project({
@@ -59,10 +69,7 @@ const createNewProject = async (req, res) => {
         projectName,
         projectDescription,
         status,
-        projectPicture: {
-            pictureId,
-            url,
-        },
+        projectPicture: newImage,
         projectLinks,
         likes: [],
         comments: [],
@@ -202,9 +209,6 @@ const editProject = async (req, res) => {
                     "Project description cannot be empty and cannot exceed 300 characters",
             });
         }
-        if (previousImageId) {
-            await cloudinary.uploader.destroy(previousImageId);
-        }
 
         // check status
         if (status == null || status < 0 || status > 2) {
@@ -213,21 +217,36 @@ const editProject = async (req, res) => {
             });
         }
 
-        // add cloudinary (new pi)
-        const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
-            folder: "showjects",
-        });
-        const { public_id: pictureId, url: url } = uploadedImage;
+        if (previousImageId) {
+            await cloudinary.uploader.destroy(previousImageId);
+        }
+
+        // add cloudinary (new pic)
+        var updatedImage = {
+            pictureId: "",
+            url: "",
+        };
+        if (projectPicture) {
+            const uploadedImage = await cloudinary.uploader.upload(
+                projectPicture,
+                {
+                    folder: "showjects",
+                }
+            );
+
+            const { public_id: pictureId, url: url } = uploadedImage;
+            updatedImage = {
+                pictureId,
+                url,
+            };
+        }
 
         // just add the project (defaults)
         const updatedProjectDetail = {
             projectName,
             projectDescription,
             status,
-            projectPicture: {
-                pictureId,
-                url,
-            },
+            projectPicture: updatedImage,
             projectLinks,
         };
         await Project.updateOne(
@@ -345,6 +364,11 @@ const deleteProject = async (req, res) => {
                 message: "Project does not exist",
             });
         }
+
+        if (currentProject.projectPicture.pictureId) {
+            await cloudinary.uploader.destroy(currentProject.projectPicture.pictureId);
+        }
+        
         Project.deleteOne(currentProject)
             .then(() => {
                 res.status(200).json({
