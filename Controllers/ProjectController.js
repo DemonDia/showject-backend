@@ -53,7 +53,7 @@ const createNewProject = async (req, res) => {
         url: "",
     };
     if (projectPicture) {
-        const uploadedImage = await cloudinary.uploader.upload(projectPicture, {
+        const uploadedImage = await cloudinary.v2.uploader.upload(projectPicture, {
             folder: "showjects",
         });
         const { public_id: pictureId, url: url } = uploadedImage;
@@ -227,7 +227,7 @@ const editProject = async (req, res) => {
             url: "",
         };
         if (projectPicture) {
-            const uploadedImage = await cloudinary.uploader.upload(
+            const uploadedImage = await cloudinary.v2.uploader.upload(
                 projectPicture,
                 {
                     folder: "showjects",
