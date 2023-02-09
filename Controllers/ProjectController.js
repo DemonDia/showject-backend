@@ -53,9 +53,12 @@ const createNewProject = async (req, res) => {
         url: "",
     };
     if (projectPicture) {
-        const uploadedImage = await cloudinary.v2.uploader.upload(projectPicture, {
-            folder: "showjects",
-        });
+        const uploadedImage = await cloudinary.v2.uploader.upload(
+            projectPicture,
+            {
+                folder: "showjects",
+            }
+        );
         const { public_id: pictureId, url: url } = uploadedImage;
         newImage = {
             pictureId,
@@ -222,10 +225,7 @@ const editProject = async (req, res) => {
         }
 
         // add cloudinary (new pic)
-        var updatedImage = {
-            pictureId: "",
-            url: "",
-        };
+        var updatedImage = null;
         if (projectPicture) {
             const uploadedImage = await cloudinary.v2.uploader.upload(
                 projectPicture,
@@ -242,13 +242,24 @@ const editProject = async (req, res) => {
         }
 
         // just add the project (defaults)
-        const updatedProjectDetail = {
-            projectName,
-            projectDescription,
-            status,
-            projectPicture: updatedImage,
-            projectLinks,
-        };
+        var updatedProjectDetail = {};
+        if (!updatedImage) {
+            updatedProjectDetail = {
+                projectName,
+                projectDescription,
+                status,
+                projectLinks,
+            };
+        } else {
+            updatedProjectDetail = {
+                projectName,
+                projectDescription,
+                status,
+                projectPicture: updatedImage,
+                projectLinks,
+            };
+        }
+        console.log(updatedProjectDetail);
         await Project.updateOne(
             {
                 _id: currentProject.id,
@@ -260,6 +271,7 @@ const editProject = async (req, res) => {
             });
         });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({
             message: err,
         });
@@ -366,9 +378,11 @@ const deleteProject = async (req, res) => {
         }
 
         if (currentProject.projectPicture.pictureId) {
-            await cloudinary.uploader.destroy(currentProject.projectPicture.pictureId);
+            await cloudinary.uploader.destroy(
+                currentProject.projectPicture.pictureId
+            );
         }
-        
+
         Project.deleteOne(currentProject)
             .then(() => {
                 res.status(200).json({
