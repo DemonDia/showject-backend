@@ -18,7 +18,7 @@ const projectSchema = mongoose.Schema({
         required: false
     },
 
-    // picture/preview of the project, stored in bits
+    // picture/preview of the project, stored in url
     // projectPicture:
         // pictureId 
         // url
@@ -59,8 +59,14 @@ const projectSchema = mongoose.Schema({
         // commentContent (what is the comment)
     comments:{
         type:Array,
-        require:true
-    }
+        required:true
+    },
+
+    // date in Date() format
+    addedDate:{
+        type:Date,
+        required:true
+    },
 
 });
 

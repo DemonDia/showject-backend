@@ -65,7 +65,7 @@ const createNewProject = async (req, res) => {
             url,
         };
     }
-
+    addedDate = new Date();
     // just add the project (defaults)
     const newProject = new Project({
         userId,
@@ -76,6 +76,7 @@ const createNewProject = async (req, res) => {
         projectLinks,
         likes: [],
         comments: [],
+        addedDate
     });
     await Project.create(newProject).then((result) => {
         return res.status(200).json({
@@ -240,6 +241,7 @@ const editProject = async (req, res) => {
                 url,
             };
         }
+
 
         // just add the project (defaults)
         var updatedProjectDetail = {};
