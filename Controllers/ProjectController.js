@@ -10,6 +10,7 @@ const cloudinary = require("cloudinary");
 const createNewProject = async (req, res) => {
     const {
         userId,
+        username,
         projectName,
         projectDescription,
         projectPicture,
@@ -69,6 +70,7 @@ const createNewProject = async (req, res) => {
     // just add the project (defaults)
     const newProject = new Project({
         userId,
+        username,
         projectName,
         projectDescription,
         status,

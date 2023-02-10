@@ -3,71 +3,74 @@ const projectSchema = mongoose.Schema({
     // name of project
     projectName: {
         type: String,
-        required: true
+        required: true,
     },
 
     // id of OP (Original Poster)
-    userId:{
-        type:String,
-        required:true
+    userId: {
+        type: String,
+        required: true,
     },
-
+    username: {
+        type: String,
+        required: true,
+    },
+    
     // description of project (may or may not be in point form)
     projectDescription: {
         type: String,
-        required: false
+        required: false,
     },
 
     // picture/preview of the project, stored in url
     // projectPicture:
-        // pictureId 
-        // url
+    // pictureId
+    // url
     projectPicture: {
         type: Object,
-        required: false
+        required: false,
     },
 
     // user's project links (Object array)
     // projectLink:
-        // linkName
-        // url
+    // linkName
+    // url
     projectLinks: {
         type: Array,
-        required: true
+        required: true,
     },
 
     // statuses:
-        // 1: get feedback/test
-        // 2: finding manpower
-        // 3: finding investor
+    // 1: get feedback/test
+    // 2: finding manpower
+    // 3: finding investor
     status: {
         type: Number,
-        required: true
+        required: true,
     },
 
     // likes: stores userId
-    likes:{
+    likes: {
         type: Array,
-        required:true
+        required: true,
     },
 
     // comments:
     // comment:
-        // id (id of comment)
-        // commenterId (userId of commenter)
-        // commentDate (date which comment was made)
-        // commentContent (what is the comment)
-    comments:{
-        type:Array,
-        required:true
+    // id (id of comment)
+    // commenterId (userId of commenter)
+    // commentDate (date which comment was made)
+    // commentContent (what is the comment)
+    comments: {
+        type: Array,
+        required: true,
     },
 
     // date in Date() format
-    addedDate:{
-        type:Date,
-        required:true
+    addedDate: {
+        type: Date,
+        required: true,
     },
-
 });
 
 module.exports = mongoose.model("Project", projectSchema);
