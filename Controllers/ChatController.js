@@ -1,5 +1,6 @@
 const User = require("../Models/UserModel");
 const Chat = require("../Models/ChatModel");
+const Message = require("../Models/MessageModel");
 
 // =========================Helper functions=========================
 // =========================Create=========================
@@ -39,14 +40,21 @@ const createChat = async (req, res) => {
                         message: "Chat exists",
                     });
                 }
-                Chat.create(
+                const newChatPromise = Chat.create(
                     new Chat({
                         users: [firstUserId, secondUserId],
                     })
-                ).then((newChat) => {
-                    return res.json({
-                        message: "Chat created",
-                        chatId: newChat._id,
+                ).then(async (newChat) => {
+                    await Message.create(
+                        new Message({
+                            chatId: newChat._id,
+                            messages: [],
+                        })
+                    ).then(() => {
+                        return res.json({
+                            message: "Chat created",
+                            chatId: newChat._id,
+                        });
                     });
                 });
             })
@@ -67,7 +75,20 @@ const createChat = async (req, res) => {
 // for each chat, return the following:
 // userProfile of the other user
 // last message of the chat
-const getUserChat = async (req, res) => {};
+const getUserChat = async (req, res) => {
+    const { userId } = req.params;
+    const selectedUser = await User.findById(userId);
+    if (!selectedUser) {
+        return res.status(404).json({
+            message: "Invalid user",
+        });
+    }
+    console.log(selectedUser._id);
+    const selectedChats = await Chat.find({
+        users: { $in: [selectedUser._id] },
+    });
+    return res.json(selectedChats);
+};
 
 // =========================Delete=========================
 // 1) Delete a chat
