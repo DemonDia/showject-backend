@@ -5,12 +5,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-
 // ==================configure a[p settings==================
 app.use(cors());
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
-
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb" }));
 
 // ==================connect to mongoose==================
 async function connect() {
@@ -24,7 +22,6 @@ async function connect() {
 
 connect();
 
-
 // ==================use the routes==================
 // =========test routes=========
 app.get("/api", (req, res) => {
@@ -33,10 +30,11 @@ app.get("/api", (req, res) => {
 
 // =========main routes=========
 // users
-
-app.use("/api/users",require("./Routes/UserRoutes"))
+app.use("/api/users", require("./Routes/UserRoutes"));
 // projects
-app.use("/api/projects",require("./Routes/ProjectRoutes"))
+app.use("/api/projects", require("./Routes/ProjectRoutes"));
+// chats
+app.use("/api/chats", require("./Routes/ChatRoutes"));
 
 // ==================port listeneer==================
 
