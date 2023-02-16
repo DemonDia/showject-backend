@@ -21,7 +21,7 @@ router.post("/", createChat);
 // for each chat, return the following:
 // userProfile of the other user
 // last message of the chat
-router.get("/", protection, getUserChat);
+router.get("/user/:userId", protection, getUserChat);
 
 // =========================Delete=========================
 // 1) Delete a chat
