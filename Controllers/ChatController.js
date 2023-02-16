@@ -135,16 +135,8 @@ const getChatById = async (req, res) => {
         const selectedUser = selectedUserResult.value;
         const selectedChat = seletedChatResult.value;
         const selectedMessages = selectedMessagesResult.value;
-        const chatUsers = selectedChat.users;
-        // let otherUser;
-        // chatUsers.forEach(async user => {
-        //     if(user != userId){
-        //         otherUser = await User.findById(user)
-        //         console.log(otherUser)
-        //     }
-
-        // });
-        // console.log(otherUser);
+        const chatUsers = selectedChat.users
+        
 
         const otherUser = await User.findById(
             chatUsers.filter((user) => {
