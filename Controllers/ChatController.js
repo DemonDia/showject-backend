@@ -135,8 +135,7 @@ const getChatById = async (req, res) => {
         const selectedUser = selectedUserResult.value;
         const selectedChat = seletedChatResult.value;
         const selectedMessages = selectedMessagesResult.value;
-        const chatUsers = selectedChat.users
-        
+        const chatUsers = selectedChat.users;
 
         const otherUser = await User.findById(
             chatUsers.filter((user) => {
@@ -174,6 +173,67 @@ const getChatById = async (req, res) => {
         });
     });
 };
+// =========================Update=========================
+// 1) Send a message
+// check if user is valid
+// check if chat is valid
+const sendMessage = async (req, res) => {
+    const { userId, chatId, message } = req.body;
+    try {
+        const checkValidUserPromise = await User.findById(userId);
+        const checkValidChatPromise = await Chat.findById(chatId);
+        const checkMessagePromise = await Message.findOne({ chatId });
+        Promise.allSettled([
+            checkValidUserPromise,
+            checkValidChatPromise,
+            checkMessagePromise,
+        ]).then((promiseResults) => {
+            const [
+                checkValidUserPromiseResult,
+                checkValidChatPromiseResult,
+                checkMessagePromiseResult,
+            ] = promiseResults;
+            const { value: userValue } = checkValidUserPromiseResult;
+            const { value: chatValue } = checkValidChatPromiseResult;
+            const { value: messageValue } = checkMessagePromiseResult;
+            console.log("userValue", userValue);
+            console.log("chatValue", chatValue);
+            console.log("messageValue", messageValue);
+            // check if all exist
+            if (!userValue || !chatValue || !messageValue) {
+                return res.status(500).json({
+                    message: "Error",
+                });
+            }
+
+            // check if user is inside chat
+            const { users } = chatValue;
+            if (!users.includes(userId)) {
+                return res.status(403).json({
+                    message: "Forbidden",
+                });
+            }
+
+            // add a message:
+            // message
+            const newMessage = {
+                userId,
+                message,
+                sentDate: new Date(),
+            };
+            messageValue.messages.push(newMessage);
+            messageValue.save();
+            return res.json({
+                message: "Message sent",
+            });
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
 
 // =========================Delete=========================
 // 1) Delete a chat
@@ -184,5 +244,6 @@ module.exports = {
     createChat,
     getUserChat,
     getChatById,
+    sendMessage,
     deleteChat,
 };
