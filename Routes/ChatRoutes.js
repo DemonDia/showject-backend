@@ -6,6 +6,7 @@ const router = express.Router();
 const {
     createChat,
     getUserChat,
+    getChatById,
     deleteChat,
 } = require("../Controllers/ChatController");
 const { protection } = require("../Middleware/protectionMiddleware");
@@ -22,6 +23,8 @@ router.post("/", createChat);
 // userProfile of the other user
 // last message of the chat
 router.get("/user/:userId", protection, getUserChat);
+
+router.get("/c/:chatId/u/:userId", protection, getChatById);
 
 // =========================Delete=========================
 // 1) Delete a chat

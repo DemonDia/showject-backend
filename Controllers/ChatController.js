@@ -40,7 +40,7 @@ const createChat = async (req, res) => {
                         message: "Chat exists",
                     });
                 }
-                const newChatPromise = Chat.create(
+                await Chat.create(
                     new Chat({
                         users: [firstUserId, secondUserId],
                     })
@@ -83,11 +83,104 @@ const getUserChat = async (req, res) => {
             message: "Invalid user",
         });
     }
-    console.log(selectedUser._id);
     const selectedChats = await Chat.find({
         users: { $in: [selectedUser._id] },
     });
-    return res.json(selectedChats);
+
+    let otherUsers = []; //capture ID
+    selectedChats.forEach((chat) => {
+        // get the users of each chat
+        // remove yourself
+        const { users } = chat;
+        otherUsers.push({
+            _id: [
+                users.filter((user) => {
+                    return user != userId;
+                })[0],
+            ],
+        });
+    });
+
+    let returnChats = [];
+    await User.find({ _id: { $in: otherUsers } }).then((users) => {
+        users.forEach((user, index) => {
+            // in each instance, return the following:
+            // chatId
+            // userId (of user other than u)
+            const { _id, name } = user;
+            returnChats.push({
+                chatId: selectedChats[index]._id,
+                otherUser: {
+                    _id,
+                    name,
+                },
+            });
+        });
+    });
+    return res.json(returnChats);
+};
+
+const getChatById = async (req, res) => {
+    const { chatId, userId } = req.params;
+    const selectedUserPromise = await User.findById(userId);
+    const selectedChatPromise = await Chat.findById(chatId);
+    const selectedMessagePromise = await Message.findOne({ chatId: chatId });
+    Promise.allSettled([
+        selectedUserPromise,
+        selectedChatPromise,
+        selectedMessagePromise,
+    ]).then(async (result) => {
+        const [selectedUserResult, seletedChatResult, selectedMessagesResult] =
+            result;
+        const selectedUser = selectedUserResult.value;
+        const selectedChat = seletedChatResult.value;
+        const selectedMessages = selectedMessagesResult.value;
+        const chatUsers = selectedChat.users;
+        // let otherUser;
+        // chatUsers.forEach(async user => {
+        //     if(user != userId){
+        //         otherUser = await User.findById(user)
+        //         console.log(otherUser)
+        //     }
+
+        // });
+        // console.log(otherUser);
+
+        const otherUser = await User.findById(
+            chatUsers.filter((user) => {
+                return user != userId;
+            })[0]
+        );
+
+        // check if user is inside chat
+        if (!selectedUser || !otherUser) {
+            return res.status(404).json({
+                message: "Invalid Users",
+            });
+        }
+
+        if (!selectedChat) {
+            return res.status(404).json({
+                message: "Invalid Chat",
+            });
+        }
+
+        if (!chatUsers.includes(selectedUser._id)) {
+            res.status(500).json({
+                message: "Forbidden",
+            });
+        }
+        // by right: name, id and profile pic
+        const { name, _id } = otherUser;
+
+        return res.json({
+            messages: selectedMessages.messages,
+            otherUser: {
+                name,
+                _id,
+            },
+        });
+    });
 };
 
 // =========================Delete=========================
@@ -98,5 +191,6 @@ const deleteChat = async (req, res) => {};
 module.exports = {
     createChat,
     getUserChat,
+    getChatById,
     deleteChat,
 };
