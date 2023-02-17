@@ -19,10 +19,8 @@ const createChat = async (req, res) => {
         const getSecondUserPromise = await User.findById(secondUser);
         Promise.allSettled([getFirstUserPromise, getSecondUserPromise])
             .then(async (result) => {
-                console.log(result);
                 const firstUserId = result[0].value._id;
                 const secondUserId = result[1].value._id;
-
                 if (firstUserId.toString() == secondUserId.toString()) {
                     return res.status(500).json({
                         message: "Users cannot be the same",
@@ -70,6 +68,7 @@ const createChat = async (req, res) => {
         });
     }
 };
+
 // =========================Read=========================
 // 1) Get all chats of a said user
 // for each chat, return the following:
@@ -120,6 +119,8 @@ const getUserChat = async (req, res) => {
     return res.json(returnChats);
 };
 
+// 2) Get all chats of a said user
+// get the messages of a specific chat by ID
 const getChatById = async (req, res) => {
     const { chatId, userId } = req.params;
     const selectedUserPromise = await User.findById(userId);
@@ -173,6 +174,42 @@ const getChatById = async (req, res) => {
         });
     });
 };
+
+// 3) Get chat by user
+const getChatByUsers = async (req, res) => {
+    const { userId1, userId2 } = req.params;
+    console.log(userId1, userId2);
+    const getFirstUserPromise = await User.findById(userId1);
+    const getSecondUserPromise = await User.findById(userId2);
+    try {
+        Promise.allSettled([getFirstUserPromise, getSecondUserPromise]).then(
+            async (promiseResults) => {
+                const firstUserId = promiseResults[0].value._id;
+                const secondUserId = promiseResults[1].value._id;
+                if (firstUserId.toString() == secondUserId.toString()) {
+                    return res.status(500).json({
+                        message: "Users cannot be the same",
+                    });
+                }
+                const usersChat = await Chat.findOne({
+                    $or: [
+                        { users: [firstUserId, secondUserId] },
+                        { users: [secondUserId, firstUserId] },
+                    ],
+                });
+                if (!usersChat) {
+                    return res.status(404).json({ message: "Chat not found" });
+                }
+                return res.json(usersChat);
+            }
+        );
+    } catch (err) {
+        return res.status(500).json({
+            message: err,
+        });
+    }
+};
+
 // =========================Update=========================
 // 1) Send a message
 // check if user is valid
@@ -244,6 +281,7 @@ module.exports = {
     createChat,
     getUserChat,
     getChatById,
+    getChatByUsers,
     sendMessage,
     deleteChat,
 };

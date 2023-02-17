@@ -7,6 +7,7 @@ const {
     createChat,
     getUserChat,
     getChatById,
+    getChatByUsers,
     sendMessage,
     deleteChat,
 } = require("../Controllers/ChatController");
@@ -24,8 +25,10 @@ router.post("/", createChat);
 // userProfile of the other user
 // last message of the chat
 router.get("/user/:userId", protection, getUserChat);
-// 2) get a specific chat of user
+// 2) Get all chats of a said user
 router.get("/c/:chatId/u/:userId", protection, getChatById);
+// 3) Get chat by user
+router.get("/u1/:userId1/u2/:userId2", protection, getChatByUsers);
 
 // =========================Update=========================
 // 1) Send a message 
