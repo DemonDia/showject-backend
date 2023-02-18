@@ -215,7 +215,7 @@ const getChatByUsers = async (req, res) => {
 // check if user is valid
 // check if chat is valid
 const sendMessage = async (req, res) => {
-    const { userId, chatId, message } = req.body;
+    const { userId, chatId, message,sentDate } = req.body;
     try {
         const checkValidUserPromise = await User.findById(userId);
         const checkValidChatPromise = await Chat.findById(chatId);
@@ -256,7 +256,7 @@ const sendMessage = async (req, res) => {
             const newMessage = {
                 userId,
                 message,
-                sentDate: new Date(),
+                sentDate
             };
             messageValue.messages.push(newMessage);
             messageValue.save();
