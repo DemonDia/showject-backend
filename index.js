@@ -38,14 +38,13 @@ app.use("/api/chats", require("./Routes/ChatRoutes"));
 
 // ==================port listeneer==================
 
-const server =  app.listen(8000, () => {
+const server = app.listen(8000, () => {
     console.log("OK");
 });
 
-
 // ==================sockets==================
 const io = require("socket.io")(server, {
-    cors: process.env.FRONTEND_URL,
+    cors: { origin: process.env.FRONTEND_URL },
 });
 
 let users = [];
