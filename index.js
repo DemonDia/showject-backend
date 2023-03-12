@@ -35,6 +35,8 @@ app.use("/api/users", require("./Routes/UserRoutes"));
 app.use("/api/projects", require("./Routes/ProjectRoutes"));
 // chats
 app.use("/api/chats", require("./Routes/ChatRoutes"));
+// comments
+app.use("/api/comments", require("./Routes/CommentRoutes"));
 
 // ==================port listeneer==================
 

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../Models/UserModel")
+const User = require("../Models/UserModel");
 const protection = async (req, res, next) => {
     if (
         req.headers.authorization &&
@@ -12,6 +12,8 @@ const protection = async (req, res, next) => {
 
             // get user from token
             req.user = await User.findById(decoded.id).select("-password");
+            req.body.userId = req.user._id;
+            console.log(req.body.userId)
 
             next();
         } catch (err) {

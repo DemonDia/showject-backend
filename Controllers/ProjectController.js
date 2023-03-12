@@ -77,7 +77,7 @@ const createNewProject = async (req, res) => {
         projectPicture: newImage,
         projectLinks,
         likes: [],
-        comments: [],
+        // comments: [],
         addedDate
     });
     await Project.create(newProject).then((result) => {
@@ -350,14 +350,14 @@ const addComment = async (req, res) => {
             });
         }
 
-        const newComment = {
-            commentId: uniqid(),
-            commenterId: userId,
-            commenterName: userName,
-            commentContent: comment,
-            commentDate: new Date(),
-        };
-        currentProject.comments.push(newComment);
+        // const newComment = {
+        //     commentId: uniqid(),
+        //     commenterId: userId,
+        //     commenterName: userName,
+        //     commentContent: comment,
+        //     commentDate: new Date(),
+        // };
+        // currentProject.comments.push(newComment);
         currentProject.save();
         return res.status(200).json({
             message: "Successfully updated",
